@@ -1,0 +1,34 @@
+<!--views/products.handlebars -->
+<div>
+  <h1>Lista de productos</h1>
+
+  <form action="/product" method="GET">
+    <input type="text" name="query" placeholder="Buscar por categoría" required>
+    <button type="submit">Buscar</button>
+  </form>
+
+  <ul>
+    {{#each products}}
+    <li>
+        <h2>{{this.nombre}}</h2>
+        <p>Precio: {{this.precio}}</p>
+        <p>Categoría: {{this.category}}</p>
+        <a href="/product/{{this._id}}">Ver detalles</a>
+
+        <!-- Botón para añadir al carrito -->
+        <form action="/cart/add/{{this._id}}" method="POST">
+            <input type="number" name="quantity" value="1" min="1" required>
+            <button type="submit">Agregar al carrito</button>
+        </form>
+    </li>
+    {{/each}}
+  </ul>
+
+  {{#if hasPrevPage}}
+      <a href="?page={{prevPage}}">Anterior</a>
+  {{/if}}
+
+  {{#if hasNextPage}}
+      <a href="?page={{nextPage}}">Siguiente</a>
+  {{/if}}
+</div>

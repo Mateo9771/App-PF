@@ -1,33 +1,33 @@
 //PF/src/app.js
 import express from 'express';
-import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import config from './configs/config.js';
 import __dirname from './utils.js';
-import { MongoClient, ServerApiVersion } from 'mongodb';
-import handlebars from 'express-handlebars'
+import handlebars from 'express-handlebars';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
+import initializePassport from './configs/passport.config.js';
 import passport from 'passport';
-import initializePassaport from './config/passport.config.js'
 
 //import routers
-import sessionsRouter from './routes/sessions.router.js';
-import userViewRouter from './routes/users.views.router.js';
+import usersViewsRouters from './routes/users.view.router.js';
+import ordersRouter from './routes/order.router.js';
+import businessRouter from './routes/business.router.js';
+import sessionRouter from './routes/session.router.js';
+import cartRouter from './routes/cart.router.js';
+import productRouter from './routes/product.router.js'
 
-
-//config Express
-const app = express();
-
-//Config dotenv
-dotenv.config();
-const PORT = process.env.PORT;
+//config Express y dotenv
+const app = express()
+const PORT = config.port;
+const URLMongoDB = config.mongoUrl;
 
 //Config Motor de plantillas
 app.engine('handlebars', handlebars.engine());
-app.set('view', __dirname + '/views');
+app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(__dirname + '/public'));
 
 //Config Json
 app.use(express.json());
@@ -37,39 +37,34 @@ app.use(express.urlencoded({extended:true}))
 app.use(cookieParser("CoderS3cr3tC0d3"));
 
 //Config passport
-initializePassaport()
+initializePassport()
 app.use(passport.initialize())
 
+app.use(session(
+    {
+        store: MongoStore.create({
+            mongoUrl: URLMongoDB,
+            ttl:3600,
+        }),
+        secret:'your-secret-key',
+        resave: true,
+        saveUninitialized: true,
+    }
+))
+
 //Config routers
-app.use('/users', userViewRouter);
-app.use('/api/sessions', sessionsRouter)
-
-//Config Mongo DB
-const uri = process.env.URL_MONGO;
-
-const client = new MongoClient(uri, {
-    ServerApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-})
-
-async function run() {
-    try {
-        await client.connect();
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You succesfully connected to MongoDB!")
-    } finally {
-        await client.close()
-    }
-}
-run().catch(console.dir)
+app.use('/api/usersViews', usersViewsRouters);
+app.use('/api/business', businessRouter);
+app.use('/api/orders', ordersRouter);
+app.use('/api/sessions', sessionRouter)
+app.use('/api/carts', cartRouter);
+app.use('/api/products', productRouter)
 
 //config Public
 app.use(express.static(__dirname + '/public'))
 
 //Config server conection
-const server = app.listen(PORT, () => {
-    console.log(`Listening on PORT ${PORT}`)
-})
+const server = app.listen(PORT, () => {console.log(`Listening on PORT ${PORT}`)});
+mongoose.connect(URLMongoDB)
+    .then(() => console.log("Conexion realizada con exito"))
+    .catch((error) => console.error("Error al conectar a la base de datos", error))

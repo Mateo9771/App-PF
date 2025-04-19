@@ -14,26 +14,25 @@ form.addEventListener('submit', e => {
         }
     }).then(result => {
         if (result.status === 200) {
-
             result.json()
                 .then(json => {
-                    // 1er:localStorage - analizamos que nos llega al cliente
                     console.log(json);
-
-                    // localStorage.setItem('authToken', json.jwt)
-
-
-                    // 2do:cookie
                     console.log("Cookies generadas:");
                     console.log(document.cookie)
-
                     alert("Login realizado con exito!")
-
+                    window.location.replace('/api/usersViews/profile');
                 })
-            window.location.replace('/users');
         } else if (result.status === 401) {
             console.log(result);
             alert("Login invalido revisa tus credenciales!");
         }
-    })
+        else {
+            result.json().then(json => {
+                alert("Error: " + (json.message || json.error));
+            });
+        }
+    }) .catch(err => {
+        console.error("Error en login:", err);
+        alert("Ocurrió un error al intentar iniciar sesión.");
+    });
 })

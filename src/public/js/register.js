@@ -17,13 +17,15 @@ form.addEventListener('submit', e => {
             'Content-Type': 'application/json'
         }
     }).then(result => {
-        if (result.status === 201) {
+        if (result.status === 200) {
             result.json();
             alert("Usuario creado con exito!");
-            window.location.replace('/users/login');
+            window.location.replace('/api/usersViews/login');
         } else {
             alert("No se pudo crear el usuario!");
         }
-    }).then(
-        json => console.log(json));
+    }).catch(error => {
+        console.error("Error en la petición fetch", error)
+        alert("Error al enviar el formulario")
+    });
 })

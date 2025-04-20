@@ -31,9 +31,10 @@ export const getCartById = async (req, res) => {
 export const createCart = async (req, res) => {
     const newCart = req.body;
     try {
-        const createdCart = await CartDAO.create(newCart);
+        const createdCart = await CartDAO.createCart(newCart.user);
         res.status(201).json(createdCart);
     } catch (error) {
+        console.error("Error al crear el carrito:", error); 
         res.status(500).json({ message: "Error al crear el carrito", error });
     }
 };
@@ -55,9 +56,10 @@ export const addProductToCart = async (req, res) => {
         }
 
         // Lógica para agregar el producto al carrito
-        const updatedCart = await CartDAO.addProduct(cartId, productId, quantity);
+        const updatedCart = await CartDAO.addProductToCart(cartId, productId, quantity);
         res.status(200).json(updatedCart);
     } catch (error) {
+        console.error("Error al agregar el producto al carrito:", error);
         res.status(500).json({ message: "Error al agregar el producto al carrito", error });
     }
 };
@@ -78,61 +80,82 @@ export const removeProductFromCart = async (req, res) => {
     }
 };
 
+export const deleteCart = async (req, res) => {
+    try {
+        const { cartId } = req.params;
+        const result = await CartDAO.deleteCart(cartId);
+        
+        if (!result) {
+            return res.status(404).json({ message: 'Carrito no encontrado' });
+        }
+        
+        return res.status(200).json({ message: 'Carrito eliminado con éxito' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error al eliminar el carrito', error });
+    }
+};
+
 export const purchaseCart = async (req, res) => {
     const { cartId } = req.params;
 
     try {
-        const cart = await CartDAO.getById(cartId);
+        const cart = await CartDAO.getById(cartId); // este debe hacer populate de products.product
+
         if (!cart) {
             return res.status(404).json({ message: "Carrito no encontrado" });
         }
 
         const productosComprados = [];
         const productosSinStock = [];
-
         let totalAmount = 0;
 
         for (const item of cart.products) {
-            const product = await ProductDAO.getById(item.product._id || item.product);
+            const product = item.product;
 
             if (product.stock >= item.quantity) {
                 product.stock -= item.quantity;
-                await ProductDAO.update(product._id, product);
+                await ProductDAO.update(product._id, { stock: product.stock });
 
                 totalAmount += product.precio * item.quantity;
                 productosComprados.push(item);
             } else {
-                productosSinStock.push(item.product._id?.toString() || item.product.toString());
+                productosSinStock.push(product._id.toString());
             }
         }
 
         if (productosComprados.length === 0) {
-            return res.status(400).json({ message: "No hay stock suficiente para procesar ningún producto", productosSinStock });
+            return res.status(400).json({ 
+                message: "No hay stock suficiente para procesar ningún producto", 
+                productosSinStock 
+            });
         }
 
-        const ticketData = {
-            code: `TICKET-${Date.now()}`,
-            purchase_datetime: new Date(),
+        const purchaserEmail = req.user?.email || "usuario@test.com";
+
+        const ticket = await TicketDAO.create({
             amount: totalAmount,
-            purchaser: req.user?.email || "usuario@test.com",
-        };
+            purchaser: purchaserEmail,
+        });
 
-        const ticket = await TicketDAO.create(ticketData);
-
+        // Filtrar productos que no pudieron comprarse
         cart.products = cart.products.filter(item =>
-            productosSinStock.includes(item.product._id?.toString() || item.product.toString())
+            productosSinStock.includes(item.product._id.toString())
         );
 
+        // Actualizar carrito
         await CartDAO.update(cartId, cart);
 
-        res.status(200).json({
-            message: "Compra realizada parcialmente",
+        return res.status(200).json({
+            message: productosSinStock.length > 0 
+                ? "Compra realizada parcialmente" 
+                : "Compra realizada exitosamente",
             ticket,
             productosNoProcesados: productosSinStock
         });
+
     } catch (error) {
         console.error("Error en compra:", error);
-        res.status(500).json({ message: "Error al procesar la compra", error });
+        return res.status(500).json({ message: "Error al procesar la compra", error });
     }
 };
-

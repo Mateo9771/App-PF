@@ -12,8 +12,6 @@ import passport from 'passport';
 
 //import routers
 import usersViewsRouters from './routes/users.view.router.js';
-import ordersRouter from './routes/order.router.js';
-import businessRouter from './routes/business.router.js';
 import sessionRouter from './routes/session.router.js';
 import cartRouter from './routes/cart.router.js';
 import productRouter from './routes/product.router.js'
@@ -54,8 +52,6 @@ app.use(session(
 
 //Config routers
 app.use('/api/usersViews', usersViewsRouters);
-app.use('/api/business', businessRouter);
-app.use('/api/orders', ordersRouter);
 app.use('/api/sessions', sessionRouter)
 app.use('/api/carts', cartRouter);
 app.use('/api/products', productRouter)

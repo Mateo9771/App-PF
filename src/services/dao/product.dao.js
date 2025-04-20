@@ -22,6 +22,9 @@ class ProductDAO {
     async delete(id) {
         return await ProductModel.findByIdAndDelete(id);
     }
+    async update(productId, updateData) {
+        return ProductModel.findByIdAndUpdate(productId, updateData, { new: true });
+      }
 }
 
 export default new ProductDAO();

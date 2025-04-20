@@ -10,31 +10,59 @@ class CartDAO {
         return new CartDTO(newCart);
     }
 
+    async getById(cartId) {
+        return await CartModel.findById(cartId).populate("products.product");
+    }
+    
     // Obtener un carrito por ID de usuario
     async getCartByUserId(userId) {
         const cart = await CartModel.findOne({ user: userId }).populate('products.product');
         return cart ? new CartDTO(cart) : null;
     }
 
+    async update(cartId, updateData) {
+        return CartModel.findByIdAndUpdate(cartId, updateData, { new: true }); 
+    }
+    
     // Obtener un carrito por su ID (cid)
     async getCartById(cartId) {
     const cart = await CartModel.findById(cartId).populate('products.product');
     return cart ? new CartDTO(cart) : null;
     }
 
-    // Añadir un producto al carrito
-    async addProductToCart(userId, productId, quantity) {
-        const cart = await CartModel.findOne({ user: userId });
+    async addProductToCart(cartId, productId, quantity) {
+        // Buscar el carrito por su ID (cartId)
+        const cart = await CartModel.findById(cartId).populate('products.product');;
         if (!cart) return null;
-
-        const existingProduct = cart.products.find(p => p.product.toString() === productId.toString());
+    
+        // Buscar si el producto ya existe en el carrito
+        const existingProduct = cart.products.find(p => p.product._id.toString() === productId.toString());
+        
         if (existingProduct) {
+            // Si el producto ya existe, aumentamos la cantidad
             existingProduct.quantity += quantity;
         } else {
+            // Si el producto no está, lo agregamos al carrito
             cart.products.push({ product: productId, quantity });
         }
-
+    
+        // Recalcular el total
+        let total = 0;
+        for (const item of cart.products) {
+            const product = item.product;
+            const productPrice = product.precio || 0;  // Asegurarse de que el precio sea un número
+            if (productPrice && !isNaN(productPrice)) {
+                total += productPrice * item.quantity;
+            }
+        }
+    
+        // Asignar el total calculado al carrito
+        cart.total = total;
+    
+        // Guardar los cambios en el carrito
         await cart.save();
+        
+        // Devolver el carrito actualizado
         return new CartDTO(cart);
     }
 
@@ -46,6 +74,11 @@ class CartDAO {
         cart.products = cart.products.filter(p => p.product.toString() !== productId.toString());
         await cart.save();
         return new CartDTO(cart);
+    }
+
+    async deleteCart(cartId) {
+        const cart = await CartModel.findByIdAndDelete(cartId);
+        return cart;
     }
 
     // Actualizar la cantidad de un producto en el carrito

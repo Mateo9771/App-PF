@@ -32,7 +32,6 @@ const initializePassport = () => {
         }
     ));
 
-
     /*=============================================
     =                localStrategy                =
     =============================================*/
@@ -67,11 +66,6 @@ const initializePassport = () => {
         }
     ));
 
-
-
-
-
-
     /*=============================================
     = Funciones de Serializacion y Desserializacion =
     =============================================*/
@@ -81,7 +75,7 @@ const initializePassport = () => {
 
     passport.deserializeUser(async (id, done) => {
         try {
-            let user = await userModel.findById(id);
+            let user = await usersModel.findById(id);
             done(null, user);
         } catch (error) {
             console.error("Error deserializando el usuario: " + error);
@@ -89,7 +83,5 @@ const initializePassport = () => {
     });
 
 }
-
-
 
 export default initializePassport;

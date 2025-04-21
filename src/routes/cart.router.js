@@ -9,6 +9,7 @@ import {
     purchaseCart, 
     deleteCart
 } from "../controllers/cart.controller.js"; // Importar las funciones del controlador
+import { passportCall, authorization } from "../utils.js";
 
 const router = Router();
 
@@ -16,9 +17,9 @@ const router = Router();
 router.get('/', getCarts);  // Obtener todos los carritos
 router.get('/:cartId', getCartById);  // Obtener un carrito por ID
 router.post('/', createCart);  // Crear un nuevo carrito
-router.post('/:cartId/products/:productId', addProductToCart);  // Agregar producto al carrito
+router.post('/:cid/product/:pid', passportCall('jwt'), authorization('user'), addProductToCart);
 router.delete('/:cartId/products/:productId', removeProductFromCart);  // Eliminar producto del carrito
-router.delete('/:cartId', deleteCart);  // Nueva ruta para eliminar el carrito
+router.delete('/:cartId', deleteCart);  //ruta para eliminar el carrito
 router.post('/:cartId/purchase', purchaseCart);
 
 export default router;

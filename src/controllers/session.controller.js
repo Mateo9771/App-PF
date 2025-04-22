@@ -30,8 +30,11 @@ export const login = async (req, res) => {
             maxAge: 60000,
             httpOnly: true
         });
-
-        res.send({ message: "Login exitoso" });
+        if (user.role === 'admin') {
+            return res.status(200).json({ redirect: '/api/sessions/admin' });
+        } else {
+            return res.status(200).json({ redirect: '/api/sessions/products' });
+        }
 
     } catch (error) {
         console.error(error);

@@ -13,7 +13,7 @@ import { passportCall } from "../utils.js";
 const router = Router();
 
 router.get('/', (req, res) => {
-    res.render('index');
+    res.render('login');
 });
 
 router.post(
@@ -29,5 +29,13 @@ router.post('/login', login);
 router.get("/logout", logout);
 
 router.get('/current', passportCall('jwt'), getCurrent);
+
+router.get('/admin', (req,res) =>{
+    res.render('admin')
+})
+
+router.get('/products', (req,res) =>{
+    res.render('products')
+})
 
 export default router;

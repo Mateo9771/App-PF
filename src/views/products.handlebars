@@ -8,22 +8,24 @@
   </form>
 
   <ul>
-    {{#each products}}
-    <li>
-        <h2>{{this.nombre}}</h2>
-        <p>Precio: {{this.precio}}</p>
-        <p>Categoría: {{this.category}}</p>
-        <p>stock:{{this.stock}}</p>
-        <a href="/product/{{this._id}}">Ver detalles</a>
+  {{#each products}}
+  <li>
+      <h2>{{this.nombre}}</h2>
+      <p>Precio: {{this.precio}}</p>
+      <p>Categoría: {{this.category}}</p>
+      <p>Stock: {{this.stock}}</p>
+      <a href="/product/{{this._id}}">Ver detalles</a>
 
-        <!-- Botón para añadir al carrito -->
-        <form action="/cart/add/{{this._id}}" method="POST">
-            <input type="number" name="quantity" value="1" min="1" required>
-            <button type="submit">Agregar al carrito</button>
-        </form>
-    </li>
-    {{/each}}
-  </ul>
+      <input type="number" id="quantity-{{this._id}}" value="1" min="1">
+      <button 
+          class="add-to-cart-btn"
+          data-product-id="{{this._id}}"
+      >
+          Agregar al carrito
+      </button>
+  </li>
+  {{/each}}
+</ul>
 
   {{#if hasPrevPage}}
       <a href="?page={{prevPage}}">Anterior</a>
@@ -33,3 +35,4 @@
       <a href="?page={{nextPage}}">Siguiente</a>
   {{/if}}
 </div>
+<script src="/js/cart.js"></script>

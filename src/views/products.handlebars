@@ -5,6 +5,12 @@
   <form action="/product" method="GET">
     <input type="text" name="query" placeholder="Buscar por categoría" required>
     <button type="submit">Buscar</button>
+
+    {{#if user.isAdmin}}
+    <a href="/products/new"><button>Insertar nuevo producto</button></a>
+  {{/if}}
+
+
   </form>
 
   <ul>

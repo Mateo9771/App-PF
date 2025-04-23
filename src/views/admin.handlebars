@@ -1,13 +1,36 @@
 <!--//PF/src/views/admin.handlebars-->
 <div>
-    <h1>Esto es el dashBoard de ADMIN</h1>
-    <p>Hola, {{user.name}}</p>
+    <!-- PF/src/views/dashboard-admin.handlebars -->
+<h1>Panel de Administración</h1>
+<p>Bienvenido, {{user.name}} </p>
 
-    <p> En este dashBoard, podes hacer un CRUD completo de los Productos</p>
+<hr>
 
-    <br>
+<ul>
+    <li>
+        <h3>Crear Producto</h3>
+        <p>Agregá un nuevo producto al catálogo.</p>
+        <a href="/products/new">Ir</a>
+    </li>
 
-    <p> Profile-dashBoard: <a href="/users">Ingresa</a></p>
-    <p> <a href="/api/sessions/logout">Logout</a></p>
+    <li>
+        <h3>🛒 Ver Productos</h3>
+        <p>Revisá el listado completo.</p>
+        <a href="/products">Ir</a>
+    </li>
+
+    <li>
+        <h3>Usuarios</h3>
+        <p>Ver o eliminar usuarios registrados.</p>
+        <a href="/admin/users">Ir</a>
+    </li>
+
+    <li>
+        <h3>Cerrar sesión</h3>
+        <p>Finalizar sesión actual.</p>
+        <a href="/api/sessions/logout">Logout</a>
+    </li>
+</ul>
+
 </div>
 <script src="/js/admin.js"></script>

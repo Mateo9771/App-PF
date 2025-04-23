@@ -8,6 +8,10 @@ form.addEventListener('submit', e => {
     console.log(data);
     const obj = {};
     data.forEach((value, key) => obj[key] = value);
+    // Si el usuario es admin, permite enviar el rol
+    if (isAdmin()) {
+        obj.role = document.getElementById('roleSelect').value;
+    }
     console.log("Objeto formado:");
     console.log(obj);
     fetch('/api/sessions/register', {
@@ -29,3 +33,7 @@ form.addEventListener('submit', e => {
         alert("Error al enviar el formulario")
     });
 })
+
+function isAdmin() {
+    return document.body.classList.contains('admin'); // ejemplo de verificación simple
+}

@@ -3,7 +3,9 @@ import UserDTO from "../services/dto/users.dto.js";
 import { isValidPassword, generateJWToken } from "../utils.js";
 
 export const registerSuccess = async (req, res) => {
-    console.log("Registrando nuevo usuario.");
+    if (role && req.user.role !== 'admin') {
+        return res.status(403).send({ status: "error", message: "Solo un administrador puede crear usuarios con rol de admin." });
+    }
     res.status(201).send({ status: "success", message: "Usuario creado con éxito." });
 };
 

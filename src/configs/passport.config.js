@@ -42,7 +42,11 @@ const initializePassport = () => {
 
             console.log("userModel", username);
 
-            const { first_name, last_name, email, age } = req.body;
+            const { first_name, last_name, email, age, role } = req.body;
+
+            const isAdmin = req.user && req.user.role === 'admin';
+            const userRole = isAdmin ? role || 'admin' : 'user'; 
+
             try {
                 const exists = await usersModel.findOne({ email: username });
                 if (exists) {
@@ -55,6 +59,7 @@ const initializePassport = () => {
                     username,
                     age,
                     password: createHash(password),
+                    role: userRole,
                     loggedBy: "App"
                 };
                 const result = await usersModel.create(user);

@@ -7,7 +7,7 @@
     <button type="submit">Buscar</button>
 
     {{#if user.isAdmin}}
-    <a href="/products/new"><button>Insertar nuevo producto</button></a>
+    <a href="/products/newProduct"><button>Insertar nuevo producto</button></a>
   {{/if}}
 
 
@@ -20,7 +20,7 @@
       <p>Precio: {{this.precio}}</p>
       <p>Categoría: {{this.category}}</p>
       <p>Stock: {{this.stock}}</p>
-      <a href="/product/{{this._id}}">Ver detalles</a>
+      <a href="/api/product/{{this._id}}">Ver detalles</a>
 
       <input type="number" id="quantity-{{this._id}}" value="1" min="1">
       <button 

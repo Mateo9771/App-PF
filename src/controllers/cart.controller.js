@@ -29,12 +29,18 @@ export const getCartById = async (req, res) => {
 
 // Controlador para crear un carrito
 export const createCart = async (req, res) => {
-    const newCart = req.body;
     try {
-        const createdCart = await CartDAO.createCart(newCart.user);
-        res.status(201).json(createdCart);
+        const userId = req.user?._id || null;
+        const createdCart = await CartDAO.createCart(userId);
+
+        if (!createdCart) {
+            return res.status(500).json({ message: 'Error al crear el carrito' });
+        }
+
+        // Asegurate de devolver el _id explícitamente
+        res.status(201).json({ _id: createdCart._id });
     } catch (error) {
-        console.error("Error al crear el carrito:", error); 
+        console.error("Error al crear el carrito:", error);
         res.status(500).json({ message: "Error al crear el carrito", error });
     }
 };

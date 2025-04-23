@@ -9,6 +9,7 @@ import {
     getCurrent
 } from "../controllers/session.controller.js";
 import { passportCall } from "../utils.js";
+import { getProducts } from "../controllers/product.controller.js";
 
 const router = Router();
 
@@ -34,8 +35,6 @@ router.get('/admin', (req,res) =>{
     res.render('admin')
 })
 
-router.get('/products', (req,res) =>{
-    res.render('products')
-})
+router.get('/products', passportCall('jwt'), getProducts)
 
 export default router;

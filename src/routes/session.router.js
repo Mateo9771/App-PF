@@ -37,4 +37,6 @@ router.get('/admin', (req,res) =>{
 
 router.get('/products', passportCall('jwt'), getProducts)
 
+
+
 export default router;

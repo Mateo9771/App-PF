@@ -1,3 +1,4 @@
+//PF\src\controllers\session.controller.js
 import usersDAO from '../services/dao/users.dao.js';
 import UserDTO from "../services/dto/users.dto.js";
 import { isValidPassword, generateJWToken } from "../utils.js";
@@ -21,28 +22,36 @@ export const login = async (req, res) => {
         if (!user) return res.status(401).json({ message: 'Usuario no encontrado' });
 
         if (!isValidPassword(user, password)) {
-            console.warn("Credenciales inválidas para: " + email);
-            return res.status(401).send({ status: "error", error: "Credenciales inválidas" });
+            console.warn('Credenciales inválidas para: ' + email);
+            return res.status(401).json({ status: 'error', error: 'Credenciales inválidas' });
         }
 
         const tokenUser = new UserDTO(user);
         const access_token = generateJWToken(tokenUser);
 
-        res.cookie("jwtCookieToken", access_token, {
-            maxAge: 60000,
-            httpOnly: true
+        // Opcional: Mantener la cookie si quieres usar ambos métodos
+        res.cookie('jwtCookieToken', access_token, {
+            maxAge: 60000, // 60 segundos
+            httpOnly: true,
         });
-        if (user.role === 'admin') {
-            return res.status(200).json({ redirect: '/api/sessions/admin' });
-        } else {
-            return res.status(200).json({ redirect: '/api/sessions/products' });
-        }
 
+        // Devolver el token y la redirección en la respuesta JSON
+        if (user.role === 'admin') {
+            return res.status(200).json({
+                token: access_token,
+                redirect: '/admin', // Ajusta según tus rutas en el frontend
+            });
+        } else {
+            return res.status(200).json({
+                token: access_token,
+                redirect: '/api/products', // Ajusta según tus rutas en el frontend
+            });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).send({ status: "error", error: "Error interno del servidor" });
+        res.status(500).json({ status: 'error', error: 'Error interno del servidor' });
     }
-};
+}
 
 export const logout = (req, res) => {
     res.clearCookie("jwtCookieToken");

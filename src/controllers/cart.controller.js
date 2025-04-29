@@ -30,43 +30,49 @@ export const getCartById = async (req, res) => {
 // Controlador para crear un carrito
 export const createCart = async (req, res) => {
     try {
-        const userId = req.user?._id || null;
-        const createdCart = await CartDAO.createCart(userId);
-
-        if (!createdCart) {
-            return res.status(500).json({ message: 'Error al crear el carrito' });
+        const userId = req.user.id; // Cambiar de req.user._id a req.user.id
+        if (!userId) {
+            console.error('Error: No se proporcionó un userId válido en req.user', req.user);
+            return res.status(401).json({ message: 'Usuario no autenticado' });
         }
 
-        // Asegurate de devolver el _id explícitamente
+        console.log('Creando carrito para userId:', userId); // Depuración
+        const createdCart = await CartDAO.createCart(userId);
+
+        if (!createdCart || !createdCart._id) {
+            console.error('Error: No se creó el carrito correctamente', createdCart);
+            return res.status(500).json({ message: 'Error interno al crear el carrito' });
+        }
+
+        console.log('Carrito creado exitosamente:', createdCart); // Depuración
         res.status(201).json({ _id: createdCart._id });
     } catch (error) {
-        console.error("Error al crear el carrito:", error);
-        res.status(500).json({ message: "Error al crear el carrito", error });
+        console.error('Error al crear el carrito:', error.message, error.stack);
+        res.status(500).json({ message: 'Error al crear el carrito', error: error.message });
     }
 };
 
 // Controlador para agregar productos a un carrito
 export const addProductToCart = async (req, res) => {
     const { cartId, productId } = req.params;
-    const { quantity } = req.body; // Suponiendo que la cantidad viene en el cuerpo de la solicitud
+    const { quantity } = req.body;
 
     try {
         const cart = await CartDAO.getById(cartId);
         if (!cart) {
-            return res.status(404).json({ message: "Carrito no encontrado" });
+            return res.status(404).json({ message: 'Carrito no encontrado' });
         }
 
         const product = await ProductDAO.getById(productId);
         if (!product) {
-            return res.status(404).json({ message: "Producto no encontrado" });
+            return res.status(404).json({ message: 'Producto no encontrado' });
         }
 
-        // Lógica para agregar el producto al carrito
         const updatedCart = await CartDAO.addProductToCart(cartId, productId, quantity);
         res.status(200).json(updatedCart);
     } catch (error) {
-        console.error("Error al agregar el producto al carrito:", error);
-        res.status(500).json({ message: "Error al agregar el producto al carrito", error });
+        console.error('Error al agregar el producto al carrito:', error);
+        res.status(500).json({ message: 'Error al agregar el producto al carrito', error: error.message });
     }
 };
 

@@ -5,10 +5,22 @@ import { CartDTO } from '../dto/cart.dto.js';
 class CartDAO {
     // Crear un carrito nuevo para un usuario
     async createCart(userId) {
-        const newCart = new CartModel({ user: userId, products: [] });
-        await newCart.save();
-        return new CartDTO(newCart);
-    }
+        try {
+          if (!userId) {
+            throw new Error('Se requiere un userId válido para crear el carrito');
+          }
+          console.log('Intentando crear carrito con userId:', userId); // Depuración
+          const newCart = new CartModel({ user: userId, products: [], total: 0 });
+          const savedCart = await newCart.save();
+          console.log('Carrito guardado en la base de datos:', savedCart); // Depuración
+          const cartDTO = new CartDTO(savedCart);
+          console.log('CartDTO creado:', cartDTO); // Depuración
+          return cartDTO;
+        } catch (error) {
+          console.error('Error en CartDAO.createCart:', error.message, error.stack);
+          throw error;
+        }
+      }
 
     async getById(cartId) {
         return await CartModel.findById(cartId).populate("products.product");

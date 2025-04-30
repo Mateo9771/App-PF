@@ -1,3 +1,4 @@
+// PF/src/services/daos/product.dao.js
 import ProductModel from "../models/product.model.js";
 
 class ProductDAO {

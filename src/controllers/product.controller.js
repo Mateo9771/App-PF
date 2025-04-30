@@ -1,7 +1,7 @@
+//PF\src\controllers\product.controller.js
 import ProductDAO from "../services/dao/product.dao.js";
 import ProductDTO from "../services/dto/product.dto.js";
 
-// Crear producto
 export const createProduct = async (req, res) => {
     try {
         const newProduct = await ProductDAO.create(req.body);
@@ -12,13 +12,13 @@ export const createProduct = async (req, res) => {
     }
 };
 
-// Obtener todos los productos
 export const getProducts = async (req, res) => {
     try {
         const { limit = 5, page = 1, sort, query } = req.query;
         const result = await ProductDAO.getAll({ limit, page, sort, query });
 
         const productsDTO = result.docs.map(p => new ProductDTO(p));
+        console.log('Productos enviados al frontend:', productsDTO); 
 
         res.render("products", {
             products: productsDTO,
@@ -34,7 +34,6 @@ export const getProducts = async (req, res) => {
     }
 };
 
-// Obtener producto por ID
 export const getProductById = async (req, res) => {
     try {
         const product = await ProductDAO.getById(req.params.id);
@@ -48,7 +47,7 @@ export const getProductById = async (req, res) => {
     }
 };
 
-// Eliminar producto
+
 export const deleteProduct = async (req, res) => {
     try {
         const deleted = await ProductDAO.delete(req.params.id);

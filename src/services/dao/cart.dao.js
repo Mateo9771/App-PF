@@ -6,27 +6,33 @@ class CartDAO {
     // Crear un carrito nuevo para un usuario
     async createCart(userId) {
         try {
-          if (!userId) {
-            throw new Error('Se requiere un userId válido para crear el carrito');
-          }
-          console.log('Intentando crear carrito con userId:', userId); // Depuración
-          const newCart = new CartModel({ user: userId, products: [], total: 0 });
-          const savedCart = await newCart.save();
-          console.log('Carrito guardado en la base de datos:', savedCart); // Depuración
-          const cartDTO = new CartDTO(savedCart);
-          console.log('CartDTO creado:', cartDTO); // Depuración
-          return cartDTO;
+            if (!userId) {
+                throw new Error('Se requiere un userId válido para crear el carrito');
+            }
+            console.log('Intentando crear carrito con userId:', userId);
+    
+        
+            let existingCart = await CartModel.findOne({ user: userId, products: [] });
+            if (existingCart) {
+                console.log('Carrito vacío existente encontrado:', existingCart);
+                return new CartDTO(existingCart);
+            }
+    
+            //nuevo carrito si no hay uno vacío
+            const newCart = new CartModel({ user: userId, products: [], total: 0 });
+            const savedCart = await newCart.save();
+            console.log('Carrito guardado en la base de datos:', savedCart);
+            return new CartDTO(savedCart);
         } catch (error) {
-          console.error('Error en CartDAO.createCart:', error.message, error.stack);
-          throw error;
+            console.error('Error en CartDAO.createCart:', error.message, error.stack);
+            throw error;
         }
-      }
-
+    }
     async getById(cartId) {
         return await CartModel.findById(cartId).populate("products.product");
     }
     
-    // Obtener un carrito por ID de usuario
+    //  carrito por ID de usuario
     async getCartByUserId(userId) {
         const cart = await CartModel.findOne({ user: userId }).populate('products.product');
         return cart ? new CartDTO(cart) : null;
@@ -36,48 +42,46 @@ class CartDAO {
         return CartModel.findByIdAndUpdate(cartId, updateData, { new: true }); 
     }
     
-    // Obtener un carrito por su ID (cid)
+    // Obtener un carrito por su ID
     async getCartById(cartId) {
     const cart = await CartModel.findById(cartId).populate('products.product');
     return cart ? new CartDTO(cart) : null;
     }
 
     async addProductToCart(cartId, productId, quantity) {
-        // Buscar el carrito por su ID (cartId)
-        const cart = await CartModel.findById(cartId).populate('products.product');;
-        if (!cart) return null;
+        console.log('DAO addProductToCart:', { cartId, productId, quantity });
+        const cart = await CartModel.findById(cartId).populate('products.product');
+        if (!cart) {
+            console.log('Carrito no encontrado:', cartId);
+            return null;
+        }
     
-        // Buscar si el producto ya existe en el carrito
         const existingProduct = cart.products.find(p => p.product._id.toString() === productId.toString());
-        
         if (existingProduct) {
-            // Si el producto ya existe, aumentamos la cantidad
             existingProduct.quantity += quantity;
         } else {
-            // Si el producto no está, lo agregamos al carrito
             cart.products.push({ product: productId, quantity });
         }
     
-        // Recalcular el total
         let total = 0;
         for (const item of cart.products) {
             const product = item.product;
-            const productPrice = product.precio || 0;  // Asegurarse de que el precio sea un número
+            console.log('Producto en carrito:', product); 
+            const productPrice = product && product.precio ? product.precio : 0;
             if (productPrice && !isNaN(productPrice)) {
                 total += productPrice * item.quantity;
+            } else {
+                console.warn(`Precio no válido para el producto ${item.product._id}:`, productPrice);
             }
         }
     
-        // Asignar el total calculado al carrito
         cart.total = total;
-    
-        // Guardar los cambios en el carrito
+        console.log('Total calculado:', total); 
         await cart.save();
         
-        // Devolver el carrito actualizado
+        console.log('Carrito actualizado:', cart);
         return new CartDTO(cart);
     }
-
     // Eliminar un producto del carrito
     async removeProductFromCart(userId, productId) {
         const cart = await CartModel.findOne({ user: userId });

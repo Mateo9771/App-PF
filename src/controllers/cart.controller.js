@@ -3,7 +3,7 @@ import CartDAO from "../services/dao/cart.dao.js";  // Asegúrate de importar el
 import ProductDAO from "../services/dao/product.dao.js"; // Si necesitas interactuar con productos también
 import TicketDAO from '../services/dao/ticket.dao.js'
 
-// Controlador para obtener todos los carritos
+
 export const getCarts = async (req, res) => {
     try {
         const carts = await CartDAO.getAll();
@@ -13,7 +13,6 @@ export const getCarts = async (req, res) => {
     }
 };
 
-// Controlador para obtener un carrito por ID
 export const getCartById = async (req, res) => {
     const { cartId } = req.params;
     try {
@@ -27,16 +26,16 @@ export const getCartById = async (req, res) => {
     }
 };
 
-// Controlador para crear un carrito
+
 export const createCart = async (req, res) => {
     try {
-        const userId = req.user.id; // Cambiar de req.user._id a req.user.id
+        const userId = req.user.id; 
         if (!userId) {
             console.error('Error: No se proporcionó un userId válido en req.user', req.user);
             return res.status(401).json({ message: 'Usuario no autenticado' });
         }
 
-        console.log('Creando carrito para userId:', userId); // Depuración
+        console.log('Creando carrito para userId:', userId); 
         const createdCart = await CartDAO.createCart(userId);
 
         if (!createdCart || !createdCart._id) {
@@ -44,7 +43,7 @@ export const createCart = async (req, res) => {
             return res.status(500).json({ message: 'Error interno al crear el carrito' });
         }
 
-        console.log('Carrito creado exitosamente:', createdCart); // Depuración
+        console.log('Carrito creado exitosamente:', createdCart); 
         res.status(201).json({ _id: createdCart._id });
     } catch (error) {
         console.error('Error al crear el carrito:', error.message, error.stack);
@@ -52,23 +51,35 @@ export const createCart = async (req, res) => {
     }
 };
 
-// Controlador para agregar productos a un carrito
 export const addProductToCart = async (req, res) => {
-    const { cartId, productId } = req.params;
-    const { quantity } = req.body;
+    const { cid, pid } = req.params;
+    const { quantity = 1 } = req.body;
+
+    console.log('Intentando agregar producto:', { cartId: cid, productId: pid, quantity, url: req.originalUrl });
 
     try {
-        const cart = await CartDAO.getById(cartId);
+        if (!cid || !pid) {
+            const missing = [];
+            if (!cid) missing.push('cartId');
+            if (!pid) missing.push('productId');
+            return res.status(400).json({ message: `Faltan parámetros: ${missing.join(', ')}` });
+        }
+
+        if (isNaN(quantity) || quantity < 1) {
+            return res.status(400).json({ message: 'La cantidad debe ser un número positivo' });
+        }
+
+        const cart = await CartDAO.getById(cid); 
         if (!cart) {
             return res.status(404).json({ message: 'Carrito no encontrado' });
         }
 
-        const product = await ProductDAO.getById(productId);
+        const product = await ProductDAO.getById(pid); 
         if (!product) {
             return res.status(404).json({ message: 'Producto no encontrado' });
         }
 
-        const updatedCart = await CartDAO.addProductToCart(cartId, productId, quantity);
+        const updatedCart = await CartDAO.addProductToCart(cid, pid, quantity); 
         res.status(200).json(updatedCart);
     } catch (error) {
         console.error('Error al agregar el producto al carrito:', error);
@@ -76,7 +87,6 @@ export const addProductToCart = async (req, res) => {
     }
 };
 
-// Controlador para eliminar un producto de un carrito
 export const removeProductFromCart = async (req, res) => {
     const { cartId, productId } = req.params;
     try {
@@ -112,7 +122,7 @@ export const purchaseCart = async (req, res) => {
     const { cartId } = req.params;
 
     try {
-        const cart = await CartDAO.getById(cartId); // este debe hacer populate de products.product
+        const cart = await CartDAO.getById(cartId); 
 
         if (!cart) {
             return res.status(404).json({ message: "Carrito no encontrado" });
@@ -155,7 +165,6 @@ export const purchaseCart = async (req, res) => {
             productosSinStock.includes(item.product._id.toString())
         );
 
-        // Actualizar carrito
         await CartDAO.update(cartId, cart);
 
         return res.status(200).json({

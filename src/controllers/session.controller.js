@@ -29,22 +29,20 @@ export const login = async (req, res) => {
         const tokenUser = new UserDTO(user);
         const access_token = generateJWToken(tokenUser);
 
-        // Opcional: Mantener la cookie si quieres usar ambos métodos
         res.cookie('jwtCookieToken', access_token, {
-            maxAge: 60000, // 60 segundos
+            maxAge: 60000, 
             httpOnly: true,
         });
 
-        // Devolver el token y la redirección en la respuesta JSON
         if (user.role === 'admin') {
             return res.status(200).json({
                 token: access_token,
-                redirect: '/admin', // Ajusta según tus rutas en el frontend
+                redirect: '/admin', 
             });
         } else {
             return res.status(200).json({
                 token: access_token,
-                redirect: '/api/products', // Ajusta según tus rutas en el frontend
+                redirect: '/api/products', 
             });
         }
     } catch (error) {

@@ -20,15 +20,15 @@
       <p>Precio: {{this.precio}}</p>
       <p>Categoría: {{this.category}}</p>
       <p>Stock: {{this.stock}}</p>
-      <a href="/api/product/{{this._id}}">Ver detalles</a>
+      <a href="/api/product/{{this.id}}">Ver detalles</a>
 
-      <input type="number" id="quantity-{{this._id}}" value="1" min="1">
-      <button 
-          class="add-to-cart-btn"
-          data-product-id="{{this._id}}"
-      >
-          Agregar al carrito
-      </button>
+      <input type="number" id="quantity-{{this.id}}" value="1" min="1">
+   <button 
+    class="add-to-cart-btn"
+    data-product-id="{{this.id}}"
+>
+    Agregar al carrito
+</button>
   </li>
   {{/each}}
 </ul>

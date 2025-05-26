@@ -13,6 +13,7 @@ import usersViewsRouters from './routes/users.view.router.js';
 import sessionRouter from './routes/session.router.js';
 import cartRouter from './routes/cart.router.js';
 import productRouter from './routes/product.router.js';
+import mocksRouter from './routes/mocks.router.js';
 
 const app = express();
 const PORT = config.port;
@@ -47,6 +48,7 @@ app.use('/api/usersViews', usersViewsRouters);
 app.use('/api/sessions', sessionRouter);
 app.use('/api/carts', cartRouter);
 app.use('/api/products', productRouter);
+app.use('/api/mocks', mocksRouter)
 
 app.use(express.static(__dirname + '/public'));
 

@@ -9,6 +9,10 @@ class UsersDAO {
         const user = new usersModel(userData);
         return await user.save();
     }
+
+    async findAll() {
+    return await usersModel.find().lean();
+  }
 }
 
 export default new UsersDAO();
